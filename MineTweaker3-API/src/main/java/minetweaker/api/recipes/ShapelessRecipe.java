@@ -86,6 +86,11 @@ public class ShapelessRecipe implements ICraftingRecipe {
 
 		result.append("recipes.addShapeless(");
 		result.append(output);
+		if (output.getAmount() > 1)
+		{
+			//Add output stack size
+			result.append(" * " + output.getAmount());
+		}
 		result.append(", [");
 
 		for (int i = 0; i < ingredients.length; i++) {

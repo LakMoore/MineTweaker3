@@ -145,28 +145,24 @@ public class RecipeConverter {
 		} else if (recipe instanceof ShapedRecipes) {
 			ShapedRecipes shaped = (ShapedRecipes) recipe;
 
-			IIngredient[][] ingredients = new IIngredient[shaped.recipeHeight][shaped.recipeWidth];
-			for (int i = 0; i < shaped.recipeHeight; i++) {
-				for (int j = 0; j < shaped.recipeWidth; j++) {
-					ingredients[i][j] = MineTweakerMC.getIItemStack(shaped.recipeItems[i * shaped.recipeWidth + j]);
-				}
+			IIngredient[] ingredients = new IIngredient[shaped.getRecipeSize()];
+			for (int i = 0; i < shaped.recipeItems.length; i++) {
+				ingredients[i] = MineTweakerMC.getIItemStack(shaped.recipeItems[i]);
 			}
 
-			return new ShapedRecipe(output, ingredients, null, false);
+			return new ShapedRecipe(output, ingredients, shaped.recipeWidth, shaped.recipeHeight, null, false);
 		} else if (recipe instanceof ShapedOreRecipe) {
 			ShapedOreRecipe shaped = (ShapedOreRecipe) recipe;
 
 			int width = (int) Math.sqrt(recipe.getRecipeSize());
 			int height = recipe.getRecipeSize() / width;
 
-			IIngredient[][] recipeIngredients = new IIngredient[height][width];
-			for (int i = 0; i < height; i++) {
-				for (int j = 0; j < width; j++) {
-					recipeIngredients[i][j] = MineTweakerMC.getIIngredient(shaped.getInput()[i * width + j]);
-				}
+			IIngredient[] recipeIngredients = new IIngredient[shaped.getRecipeSize()];
+			for (int i = 0; i < shaped.getInput().length; i++) {
+				recipeIngredients[i] = MineTweakerMC.getIIngredient(shaped.getInput()[i]);
 			}
 
-			return new ShapedRecipe(output, recipeIngredients, null, false);
+			return new ShapedRecipe(output, recipeIngredients, width, height, null, false);
 		} else if (recipe instanceof ShapelessOreRecipe) {
 			ShapelessOreRecipe shapeless = (ShapelessOreRecipe) recipe;
 

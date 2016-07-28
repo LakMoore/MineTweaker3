@@ -52,7 +52,9 @@ public interface IRecipeManager {
 	@ZenMethod
 	public void addShaped(
 			IItemStack output,
-			IIngredient[][] ingredients,
+			IIngredient[] ingredients,
+			int width,
+			int height,
 			@Optional IRecipeFunction function);
 
 	/**
@@ -65,7 +67,9 @@ public interface IRecipeManager {
 	@ZenMethod
 	public void addShapedMirrored(
 			IItemStack output,
-			IIngredient[][] ingredients,
+			IIngredient[] ingredients,
+			int width,
+			int height,
 			@Optional IRecipeFunction function);
 
 	/**

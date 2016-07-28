@@ -103,13 +103,13 @@ public class MCRecipeManager implements IRecipeManager {
 	}
 
 	@Override
-	public void addShaped(IItemStack output, IIngredient[][] ingredients, IRecipeFunction function) {
-		addShaped(output, ingredients, function, false);
+	public void addShaped(IItemStack output, IIngredient[] ingredients, int width, int height, IRecipeFunction function) {
+		addShaped(output, ingredients, width, height, function, false);
 	}
 
 	@Override
-	public void addShapedMirrored(IItemStack output, IIngredient[][] ingredients, IRecipeFunction function) {
-		addShaped(output, ingredients, function, true);
+	public void addShapedMirrored(IItemStack output, IIngredient[] ingredients, int width, int height, IRecipeFunction function) {
+		addShaped(output, ingredients, width, height, function, true);
 	}
 
 	@Override
@@ -394,8 +394,8 @@ public class MCRecipeManager implements IRecipeManager {
 		}
 	}
 
-	private void addShaped(IItemStack output, IIngredient[][] ingredients, IRecipeFunction function, boolean mirrored) {
-		ShapedRecipe recipe = new ShapedRecipe(output, ingredients, function, mirrored);
+	private void addShaped(IItemStack output, IIngredient[] ingredients, int width, int height, IRecipeFunction function, boolean mirrored) {
+		ShapedRecipe recipe = new ShapedRecipe(output, ingredients, width, height, function, mirrored);
 		IRecipe irecipe = RecipeConverter.convert(recipe);
 		MineTweakerAPI.apply(new ActionAddRecipe(irecipe, recipe));
 	}
