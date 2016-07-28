@@ -81,10 +81,10 @@ public class MCServer extends AbstractServer {
 
 	private static void removeCommand(ICommand command) {
 		CommandHandler ch = (CommandHandler) MinecraftServer.getServer().getCommandManager();
-		ch.getCommands().remove(command.getName());
+		ch.getCommands().remove(command.getCommandName());
 
-		if (command.getAliases() != null) {
-			for (String alias : (List<String>) command.getAliases()) {
+		if (command.getCommandAliases() != null) {
+			for (String alias : (List<String>) command.getCommandAliases()) {
 				ch.getCommands().remove(alias);
 			}
 		}
@@ -108,7 +108,7 @@ public class MCServer extends AbstractServer {
 		}
 
 		@Override
-		public String getName() {
+		public String getCommandName() {
 			return name;
 		}
 
@@ -118,12 +118,12 @@ public class MCServer extends AbstractServer {
 		}
 
 		@Override
-		public List getAliases() {
+		public List getCommandAliases() {
 			return aliases;
 		}
 
 		@Override
-		public boolean canCommandSenderUse(ICommandSender var1) {
+		public boolean canCommandSenderUseCommand(ICommandSender var1) {
 			if (validator == null) {
 				return true;
 			} else {
@@ -143,7 +143,7 @@ public class MCServer extends AbstractServer {
 		}
 
 		@Override
-		public void execute(ICommandSender sender, String[] args) throws CommandException {
+		public void processCommand(ICommandSender sender, String[] args) throws CommandException {
 			function.execute(args, getPlayer(sender));
 		}
 
@@ -182,12 +182,12 @@ public class MCServer extends AbstractServer {
 
 		@Override
 		public String describe() {
-			return "Adding command " + command.getName();
+			return "Adding command " + command.getCommandName();
 		}
 
 		@Override
 		public String describeUndo() {
-			return "Removing command " + command.getName();
+			return "Removing command " + command.getCommandName();
 		}
 
 		@Override
@@ -221,12 +221,12 @@ public class MCServer extends AbstractServer {
 
 		@Override
 		public String describe() {
-			return "Adding command " + command.getName();
+			return "Adding command " + command.getCommandName();
 		}
 
 		@Override
 		public String describeUndo() {
-			return "Removing command " + command.getName();
+			return "Removing command " + command.getCommandName();
 		}
 
 		@Override

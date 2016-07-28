@@ -51,7 +51,7 @@ import minetweaker.util.IEventHandler;
 /**
  * The implementation API is used by API implementations for internal
  * communication and initialization.
- * 
+ *
  * @author Stan Hebben
  */
 public class MineTweakerImplementationAPI {
@@ -219,7 +219,7 @@ public class MineTweakerImplementationAPI {
 										IItemStack out = shapeless.getOutput();
 										MineTweakerAPI.logError("Could not dump recipe for " + out, ex);
 									} else {
-										MineTweakerAPI.logError("Could not dump recipe", ex)
+										MineTweakerAPI.logError("Could not dump recipe", ex);
 									}
 								}
 							}
@@ -533,7 +533,7 @@ public class MineTweakerImplementationAPI {
 
 	/**
 	 * Initializes the MineTweaker API.
-	 * 
+	 *
 	 * @param oreDict ore dictionary interface
 	 * @param recipes recipe manager interface
 	 * @param furnace furnace manager interface
@@ -561,21 +561,21 @@ public class MineTweakerImplementationAPI {
 
 	/**
 	 * Register an event handler to be fired upon reload.
-	 * 
+	 *
 	 * @param handler
 	 * @return
 	 */
 	public static IEventHandle onReloadEvent(IEventHandler<ReloadEvent> handler) {
 		return ONRELOAD.add(handler);
 	}
-	
+
 	public static IEventHandle onPostReload(IEventHandler<ReloadEvent> handler) {
 		return ONPOSTRELOAD.add(handler);
 	}
 
 	/**
 	 * Must be called upon server start.
-	 * 
+	 *
 	 * @param server server interface
 	 */
 	public static void onServerStart(IServer server) {
@@ -592,7 +592,7 @@ public class MineTweakerImplementationAPI {
 
 	/**
 	 * Sets the script provider.
-	 * 
+	 *
 	 * @param provider script provider
 	 */
 	public static void setScriptProvider(IScriptProvider provider) {
@@ -631,7 +631,7 @@ public class MineTweakerImplementationAPI {
 //				MineTweakerAPI.game.signalLockError();
 //				return;
 //			}
-//		} else {	
+//		} else {
 //			System.out.println("First time loading a script, go ahead");
 //		}
 
@@ -675,14 +675,14 @@ public class MineTweakerImplementationAPI {
 		if (MineTweakerAPI.server != null) {
 			platform.distributeScripts(MineTweakerAPI.tweaker.getScriptData());
 		}
-		
+
 		ONPOSTRELOAD.publish(new ReloadEvent());
 	}
 
 	/**
 	 * Adds a new minetweaker command. Can be called with /mt &lt;command&;gt;
 	 * &lt;arguments&gt;.
-	 * 
+	 *
 	 * @param name command name
 	 * @param description description strings
 	 * @param function command implementation

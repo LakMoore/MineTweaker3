@@ -45,7 +45,8 @@ public class ShapelessRecipeAdvanced implements IRecipe {
 	}
 
 	@Override
-	public ItemStack[] getRemainingItems(InventoryCrafting p_179532_1_) {
+	//getRemainingItems
+	public ItemStack[] func_179532_b(InventoryCrafting p_179532_1_) {
 		return new ItemStack[] {};
 	}
 }
