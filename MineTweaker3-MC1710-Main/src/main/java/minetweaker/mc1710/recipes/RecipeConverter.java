@@ -49,7 +49,8 @@ public class RecipeConverter {
 	private static int getRecipeType(IIngredient[] ingredients) {
 		int type = TYPE_BASIC;
 		for (IIngredient ingredient : ingredients) {
-			type = Math.min(type, getIngredientType(ingredient));
+			if (ingredient != null)
+				type = Math.min(type, getIngredientType(ingredient));
 		}
 		return type;
 	}
@@ -77,24 +78,24 @@ public class RecipeConverter {
 
 	public static IRecipe convert(ShapedRecipe recipe) {
 		IIngredient[] ingredients = recipe.getIngredients();
-		byte[] posx = recipe.getIngredientsX();
-		byte[] posy = recipe.getIngredientsY();
 
 		// determine recipe type
 		int type = getRecipeType(ingredients);
-
+		
 		// construct recipe
 		if (type == TYPE_BASIC) {
 			ItemStack[] basicIngredients = new ItemStack[recipe.getHeight() * recipe.getWidth()];
 			for (int i = 0; i < ingredients.length; i++) {
-				basicIngredients[posx[i] + posy[i] * recipe.getWidth()] = getItemStack(ingredients[i]);
+				if(ingredients[i] != null)
+					basicIngredients[i] = getItemStack(ingredients[i]);
 			}
 
 			return new ShapedRecipeBasic(basicIngredients, recipe);
 		} else if (type == TYPE_ORE) {
 			Object[] converted = new Object[recipe.getHeight() * recipe.getWidth()];
 			for (int i = 0; i < ingredients.length; i++) {
-				converted[posx[i] + posy[i] * recipe.getWidth()] = ingredients[i].getInternal();
+				if(ingredients[i] != null)
+					converted[i] = ingredients[i].getInternal();
 			}
 
 			// arguments contents:
@@ -102,7 +103,7 @@ public class RecipeConverter {
 			// 2) characters + ingredients
 
 			int counter = 0;
-			String[] parts = new String[recipe.getHeight()];
+			String[] rows = new String[recipe.getHeight()];
 			ArrayList rarguments = new ArrayList();
 			for (int i = 0; i < recipe.getHeight(); i++) {
 				char[] pattern = new char[recipe.getWidth()];
@@ -117,10 +118,10 @@ public class RecipeConverter {
 						counter++;
 					}
 				}
-				parts[i] = new String(pattern);
+				rows[i] = new String(pattern);
 			}
 
-			rarguments.addAll(0, Arrays.asList(parts));
+			rarguments.addAll(0, Arrays.asList(rows));
 
 			return new ShapedRecipeOre(rarguments.toArray(), recipe);
 		} else {
@@ -149,9 +150,20 @@ public class RecipeConverter {
 			}
 
 			return new ShapedRecipe(output, ingredients, shaped.recipeWidth, shaped.recipeHeight, null, false);
+		} else if (recipe instanceof ShapedRecipeOre) {
+			ShapedRecipeOre shaped = (ShapedRecipeOre) recipe;
+
+			IIngredient[] recipeIngredients = new IIngredient[recipe.getRecipeSize()];
+			for (int i = 0; i < shaped.getInput().length; i++) {
+				recipeIngredients[i] = MineTweakerMC.getIIngredient(shaped.getInput()[i]);
+			}
+
+			return new ShapedRecipe(output, recipeIngredients, shaped.getWidth(), shaped.getHeight(), null, false);
 		} else if (recipe instanceof ShapedOreRecipe) {
 			ShapedOreRecipe shaped = (ShapedOreRecipe) recipe;
 
+			//This is really bad.  If the recipe is 3 wide by 2 tall the following will not find the correct width
+			//Have sent a pull request to MinecraftForge to add a getWidth() to ShapedOreRecipe
 			int width = (int) Math.sqrt(recipe.getRecipeSize());
 			int height = recipe.getRecipeSize() / width;
 

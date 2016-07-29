@@ -35,4 +35,12 @@ public class ShapedRecipeOre extends ShapedOreRecipe {
 	public ItemStack getCraftingResult(InventoryCrafting inventory) {
 		return getItemStack(recipe.getCraftingResult(MCCraftingInventory.get(inventory))).copy();
 	}
+	
+	public int getWidth() {
+		return this.recipe.getWidth();
+	}
+	
+	public int getHeight() {
+		return this.recipe.getHeight();
+	}
 }

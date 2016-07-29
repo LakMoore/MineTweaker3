@@ -12,7 +12,6 @@ import minetweaker.api.item.IIngredient;
 import minetweaker.api.item.IItemStack;
 import minetweaker.api.player.IPlayer;
 
-
 /**
  *
  * @author Stan
@@ -20,59 +19,84 @@ import minetweaker.api.player.IPlayer;
 public class ShapedRecipe implements ICraftingRecipe {
 	private final int width;
 	private final int height;
-	private final byte[] posx;
-	private final byte[] posy;
+	private final byte[] colPos;
+	private final byte[] rowPos;
 	private final boolean mirrored;
 	private final IRecipeFunction function;
 
 	private final IItemStack output;
 	private final IIngredient[] ingredients;
 
-	public ShapedRecipe(IItemStack output, IIngredient[] ingredients, int width, int height, IRecipeFunction function, boolean mirrored) {
+	public ShapedRecipe(IItemStack output, IIngredient[][] ingredients, IRecipeFunction function, boolean mirrored) {
+		
+		int height = 0;
+		int width = 0;		
+		int thisRowWidth = 0;
 		int numIngredients = 0;
-//		for (IIngredient[] row : ingredients) {
-			for (IIngredient ingredient : ingredients) {
-				if (ingredient != null) {
-					numIngredients++;
-				}
-//			}
-		}
+		IIngredient[] temp = new IIngredient[9];  //max size!
 
-		this.posx = new byte[numIngredients];
-		this.posy = new byte[numIngredients];
-		this.output = output;
-		this.ingredients = new IIngredient[numIngredients];
-		this.function = function;
-
-		int width1 = 0;
-		int height1 = ingredients.length;
-
-		int ix = 0;
-		for (int j = 0; j < width; j++) {
-//		for (int j = 0; j < ingredients.length; j++) {
-//			IIngredient[] row = ingredients[j];
-//			width1 = Math.max(width1, row.length);
-
-//			for (int i = 0; i < row.length; i++) {
-			for (int i = 0; i < height; i++) {
-				if (ingredients[i] != null) {
-					this.posx[ix] = (byte) j;
-					this.posy[ix] = (byte) i;
-					this.ingredients[ix] = ingredients[i];
-					ix++;
-				}
+		for (IIngredient[] row : ingredients) {
+			height ++;
+			thisRowWidth = 0;
+			for (IIngredient ing : row) {
+				temp[numIngredients] = ing;
+				thisRowWidth ++;
+				numIngredients ++;
+			}				
+			if (thisRowWidth > width) {
+				width = thisRowWidth;
 			}
 		}
-
-		this.width = width; //width1;
-		this.height = height; // height1;
+		
+		IIngredient[] finalIng = new IIngredient[numIngredients];  //max size!		
+		if (numIngredients < 9){
+			for(int i = 0; i < numIngredients; i++) {
+				finalIng[i] = temp[i];				
+			}
+		}
+		else{
+			finalIng = temp;			
+		}
+		
+		this.colPos = new byte[numIngredients];
+		this.rowPos = new byte[numIngredients];
+		this.output = output;
+		this.ingredients = finalIng;
+		this.function = function;
+		this.height = height;
+		this.width = width;
 		this.mirrored = mirrored;
 
-		String d = output + " = " + width + " x " + height + " ";
-		for (int index = 0; index < this.ingredients.length; index++) {
-			d += "(" + this.posx[index] + "," + this.posy[index] + ") " + this.ingredients[index] + " ";
+		int ix = 0;
+		for (int row = 0; row < this.height; row++) {
+			for (int col = 0; col < this.width; col++) {
+				this.colPos[ix] = (byte) col;
+				this.rowPos[ix] = (byte) row;
+				ix++;
+			}
 		}
-		System.out.println(d);
+		
+	}
+
+	public ShapedRecipe(IItemStack output, IIngredient[] ingredients, int width, int height, IRecipeFunction function, boolean mirrored) {
+		int numIngredients = ingredients.length;
+		this.colPos = new byte[numIngredients];
+		this.rowPos = new byte[numIngredients];
+		this.output = output;
+		this.ingredients = ingredients;
+		this.function = function;
+		this.height = height;
+		this.width = width;
+		this.mirrored = mirrored;
+
+		int ix = 0;
+		for (int row = 0; row < this.height; row++) {
+			for (int col = 0; col < this.width; col++) {
+				this.colPos[ix] = (byte) col;
+				this.rowPos[ix] = (byte) row;
+				ix++;
+			}
+		}		
 		
 	}
 
@@ -92,13 +116,29 @@ public class ShapedRecipe implements ICraftingRecipe {
 		return ingredients;
 	}
 
-	public byte[] getIngredientsX() {
-		return posx;
+	public byte[] getIngredientCols() {
+		return colPos;
 	}
 
-	public byte[] getIngredientsY() {
-		return posy;
+	public byte[] getIngredientRows() {
+		return rowPos;
 	}
+
+	/**
+     * Returns the Ingredient in the slot specified (Top left is 0, 0). Args: row, column
+     */
+    public IIngredient getIngredientAt(int row, int col)
+    {
+        if (row >= 0 && row < getHeight())
+        {
+            int k = col + row * getWidth();
+            return getIngredients()[k];
+        }
+        else
+        {
+            return null;
+        }
+    }
 
 	public IItemStack getOutput() {
 		return output;
@@ -113,7 +153,7 @@ public class ShapedRecipe implements ICraftingRecipe {
 		for (int i = 0; i <= inventory.getWidth() - width; i++) {
 			out: for (int j = 0; j <= inventory.getHeight() - height; j++) {
 				for (int k = 0; k < ingredients.length; k++) {
-					IItemStack item = inventory.getStack(posx[k] + i, posy[k] + j);
+					IItemStack item = inventory.getStack(colPos[k] + i, rowPos[k] + j);
 					if (item == null)
 						continue out;
 
@@ -129,7 +169,7 @@ public class ShapedRecipe implements ICraftingRecipe {
 			for (int i = 0; i <= inventory.getWidth() - width; i++) {
 				out: for (int j = 0; j <= inventory.getHeight() - height; j++) {
 					for (int k = 0; k < ingredients.length; k++) {
-						IItemStack item = inventory.getStack(inventory.getWidth() - (posx[k] + i) - 1, posy[k] + j);
+						IItemStack item = inventory.getStack(inventory.getWidth() - (colPos[k] + i) - 1, rowPos[k] + j);
 						if (item == null)
 							continue out;
 
@@ -152,7 +192,7 @@ public class ShapedRecipe implements ICraftingRecipe {
 		for (int i = 0; i <= inventory.getWidth() - width; i++) {
 			out: for (int j = 0; j <= inventory.getHeight() - height; j++) {
 				for (int k = 0; k < ingredients.length; k++) {
-					IItemStack item = inventory.getStack(posx[k] + i, posy[k] + j);
+					IItemStack item = inventory.getStack(colPos[k] + i, rowPos[k] + j);
 					if (item == null)
 						continue out;
 
@@ -169,7 +209,7 @@ public class ShapedRecipe implements ICraftingRecipe {
 			for (int i = 0; i <= inventory.getWidth() - width; i++) {
 				out: for (int j = 0; j <= inventory.getHeight() - height; j++) {
 					for (int k = 0; k < ingredients.length; k++) {
-						IItemStack item = inventory.getStack(inventory.getWidth() - (posx[k] + i) - 1, posy[k] + j);
+						IItemStack item = inventory.getStack(inventory.getWidth() - (colPos[k] + i) - 1, rowPos[k] + j);
 						if (item == null)
 							continue out;
 
@@ -189,7 +229,7 @@ public class ShapedRecipe implements ICraftingRecipe {
 	@Override
 	public boolean hasTransformers() {
 		for (IIngredient ingredient : ingredients) {
-			if (ingredient.hasTransformers()) {
+			if (ingredient != null && ingredient.hasTransformers()) {
 				return true;
 			}
 		}
@@ -204,7 +244,7 @@ public class ShapedRecipe implements ICraftingRecipe {
 		for (int i = 0; i <= inventory.getWidth() - width; i++) {
 			out: for (int j = 0; j <= inventory.getHeight() - height; j++) {
 				for (int k = 0; k < ingredients.length; k++) {
-					IItemStack item = inventory.getStack(posx[k] + i, posy[k] + j);
+					IItemStack item = inventory.getStack(colPos[k] + i, rowPos[k] + j);
 					if (item == null)
 						continue out;
 
@@ -222,7 +262,7 @@ public class ShapedRecipe implements ICraftingRecipe {
 			for (int i = 0; i <= inventory.getWidth() - width; i++) {
 				out: for (int j = 0; j <= inventory.getHeight() - height; j++) {
 					for (int k = 0; k < ingredients.length; k++) {
-						IItemStack item = inventory.getStack(inventory.getWidth() - (posx[k] + i) - 1, posy[k] + j);
+						IItemStack item = inventory.getStack(inventory.getWidth() - (colPos[k] + i) - 1, rowPos[k] + j);
 						if (item == null)
 							continue out;
 
@@ -241,7 +281,6 @@ public class ShapedRecipe implements ICraftingRecipe {
 	@Override
 	public String toCommandString() {
 		StringBuilder result = new StringBuilder();
-		result.append(width + " x " + height + " = ");
 		result.append("recipes.addShaped(");
 		result.append(output);
 		if (output.getAmount() > 1)
@@ -251,27 +290,18 @@ public class ShapedRecipe implements ICraftingRecipe {
 		}
 		result.append(", [");
 
-		Integer i = 0;
-		for (int x = 0; x < height; x++) {
-			if (x > 0) {
+		for (int row = 0; row < getHeight(); row++) {
+			if (row > 0) {
 				result.append(", ");
 			}
 
 			result.append("[");
 
-			for (int y = 0; y < width; y++) {
-				if (y > 0)
+			for (int col = 0; col < getWidth(); col++) {
+				if (col > 0)
 					result.append(", ");
-				
-				if (i < ingredients.length && posy[i] == y && posx[i] == x)
-				{
-					result.append(ingredients[i]);
-					i++;
-				}
-				else
-				{
-					result.append("null");
-				}
+			
+					result.append(getIngredientAt(row, col));
 			}
 
 			result.append("]");
@@ -329,13 +359,13 @@ public class ShapedRecipe implements ICraftingRecipe {
 			if (transformed != stacks[i]) {
 				if (mirrored) {
 					inventory.setStack(
-							inventory.getWidth() - (offx + posx[i]) - 1,
-							offy + posy[i],
+							inventory.getWidth() - (offx + colPos[i]) - 1,
+							offy + rowPos[i],
 							transformed);
 				} else {
 					inventory.setStack(
-							offx + posx[i],
-							offy + posy[i],
+							offx + colPos[i],
+							offy + rowPos[i],
 							transformed);
 				}
 			}
