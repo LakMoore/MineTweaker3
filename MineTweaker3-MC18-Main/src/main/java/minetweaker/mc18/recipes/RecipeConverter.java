@@ -51,7 +51,8 @@ public class RecipeConverter {
 	private static int getRecipeType(IIngredient[] ingredients) {
 		int type = TYPE_BASIC;
 		for (IIngredient ingredient : ingredients) {
-			type = Math.min(type, getIngredientType(ingredient));
+			if (ingredient != null)
+				type = Math.min(type, getIngredientType(ingredient));
 		}
 		return type;
 	}
@@ -79,8 +80,6 @@ public class RecipeConverter {
 
 	public static IRecipe convert(ShapedRecipe recipe) {
 		IIngredient[] ingredients = recipe.getIngredients();
-		byte[] posx = recipe.getIngredientsX();
-		byte[] posy = recipe.getIngredientsY();
 
 		// determine recipe type
 		int type = getRecipeType(ingredients);
@@ -89,14 +88,14 @@ public class RecipeConverter {
 		if (type == TYPE_BASIC) {
 			ItemStack[] basicIngredients = new ItemStack[recipe.getHeight() * recipe.getWidth()];
 			for (int i = 0; i < ingredients.length; i++) {
-				basicIngredients[posx[i] + posy[i] * recipe.getWidth()] = getItemStack(ingredients[i]);
+				basicIngredients[i] = getItemStack(ingredients[i]);
 			}
 
 			return new ShapedRecipeBasic(basicIngredients, recipe);
 		} else if (type == TYPE_ORE) {
 			Object[] converted = new Object[recipe.getHeight() * recipe.getWidth()];
 			for (int i = 0; i < ingredients.length; i++) {
-				converted[posx[i] + posy[i] * recipe.getWidth()] = ingredients[i].getInternal();
+				converted[i] = ingredients[i].getInternal();
 			}
 
 			// arguments contents:
@@ -154,6 +153,7 @@ public class RecipeConverter {
 		} else if (recipe instanceof ShapedOreRecipe) {
 			ShapedOreRecipe shaped = (ShapedOreRecipe) recipe;
 
+			//Really bad, this needs fixing in Forge
 			int width = (int) Math.sqrt(recipe.getRecipeSize());
 			int height = recipe.getRecipeSize() / width;
 
